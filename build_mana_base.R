@@ -83,6 +83,16 @@ build_mana_base <- function(
                    paste0("t:land kw:channel id:", col_str))
   }
   
+  if ("mdfc" %in% types) {
+    query_vec <- c(query_vec,
+                   paste0("t:land is:mdfc is:spell id:", col_str))
+  }
+  
+  if ("mh3dfc" %in% types) {
+    query_vec <- c(query_vec,
+                   paste0("t:land is:mdfc is:spell e:mh3 id:", col_str))
+  }
+  
   query_vec <- c(query_vec,
                  map_chr(intersect(types, land_nick), ~paste0("is:", .x)) %>% 
                    paste(collapse = " or ") %>% 
@@ -100,3 +110,5 @@ build_mana_base("guw",
 
 scryfall_list("t:land t:artifact -is:dfc")
 scryfall_list("t:land t:artifact -o:'~ enters the battlefield tapped.' -is:dfc")
+
+scryfall_list("t:land is:mdfc is:spell")
