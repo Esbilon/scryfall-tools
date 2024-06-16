@@ -21,6 +21,25 @@ id_to_types <- function(col_str, query = "t") {
   
 }
 
+scryfall_list <- function(query_str) {
+  query_html <- query_str %>% 
+    utf8::as_utf8() %>%
+    RCurl::curlPercentEncode() %>% 
+    str_replace_all("\\%20", "+")
+  
+  sf_out <- GET(url = paste0(base_url, 
+                             "/cards/search?q=",
+                             query_html))
+  
+  out_vec <- map_chr(content(sf_out)[[4]], ~.x$name)
+  
+  c(paste0("N = ", length(out_vec)), out_vec) %>% 
+    paste(collapse = "\n") %>% 
+    cat()
+  
+  invisible(out_vec)
+}
+
 build_mana_base <- function(
     col_str, 
     types = c("fetchland", "shockland", "surveilland", "dual", "triome")
@@ -71,22 +90,7 @@ build_mana_base <- function(
   
   query_str <- paste0("(", paste(query_vec, collapse = ") or ("), ")")
   
-  query_html <- query_str %>% 
-    utf8::as_utf8() %>%
-    RCurl::curlPercentEncode() %>% 
-    str_replace_all("\\%20", "+")
-  
-  sf_out <- GET(url = paste0(base_url, 
-                             "/cards/search?q=",
-                             query_html))
-  
-  out_vec <- map_chr(content(sf_out)[[4]], ~.x$name)
-  
-  c(paste0("N = ", length(out_vec)), out_vec) %>% 
-    paste(collapse = "\n") %>% 
-    cat()
-  
-  invisible(out_vec)
+  scryfall_list(query_str)
 }
 
 build_mana_base("guw", 
@@ -94,3 +98,5 @@ build_mana_base("guw",
                           "triome", "fastland", "canopyland", "snowbasic",
                           "channelland"))
 
+scryfall_list("t:land t:artifact -is:dfc")
+scryfall_list("t:land t:artifact -o:'~ enters the battlefield tapped.' -is:dfc")
